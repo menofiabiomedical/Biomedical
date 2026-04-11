@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>نظام الهندسة الطبية - مستشفيات جامعة المنوفية</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #eef2f7; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .card { background: white; border-radius: 24px; padding: 20px 25px; margin-bottom: 25px; box-shadow: 0 6px 14px rgba(0,0,0,0.05); }
+        .header-card { background: linear-gradient(135deg, #0b2b44, #1e4a76); color: white; text-align: center; }
+        .header-card h1 { font-size: 28px; margin-bottom: 5px; }
+        .header-card h2 { font-size: 20px; font-weight: normal; opacity: 0.9; }
+        .alert { background: #fff8e7; border-right: 5px solid #f1c40f; padding: 14px 20px; border-radius: 20px; margin-bottom: 25px; font-weight: bold; }
+        .alert-danger { background: #ffeaea; border-right-color: #e74c3c; color: #c0392b; }
+        .btn { border: none; padding: 8px 15px; border-radius: 40px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 5px; margin: 2px; }
+        .btn-success { background: #1f8a4c; color: white; }
+        .btn-danger { background: #b91c1c; color: white; }
+        .btn-warning { background: #e67e22; color: white; }
+        .btn-info { background: #2c6e9e; color: white; }
+        .btn-close { background: #27ae60; color: white; }
+        .btn-print { background: #5d4e3c; color: white; }
+        .btn-edit { background: #f39c12; color: white; }
+        .btn-excel { background: #1f724c; color: white; }
+        input, select, textarea { padding: 10px 14px; border-radius: 16px; border: 1px solid #cbd5e6; font-size: 14px; width: 100%; background: #fff; }
+        textarea { resize: vertical; min-height: 70px; }
+        .table-wrapper { overflow-x: auto; margin-top: 20px; border-radius: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #f1f5f9; padding: 12px 8px; text-align: right; font-weight: 600; }
+        td { padding: 10px 8px; border-bottom: 1px solid #e4e9f0; }
+        .warning-row { background: #fff7e5; border-right: 3px solid #f39c12; }
+        .expired-row { background: #ffeaea; border-right: 3px solid #c0392b; }
+        .closed-row { background: #e8f5e9; }
+        .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; justify-content: center; }
+        .tab-btn { background: white; border: none; padding: 10px 22px; border-radius: 50px; font-size: 14px; font-weight: 500; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .tab-btn.active { background: #1e4a76; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; align-items: end; }
+        .stats-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+        .stat-box { background: #f8fafc; padding: 18px 25px; border-radius: 28px; flex: 1; text-align: center; border: 1px solid #e2edf7; }
+        .dept-selector { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .dept-selector label { font-weight: bold; font-size: 16px; }
+        .dept-selector select { width: 200px; margin-bottom: 0; }
+        .filter-bar { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; padding: 10px; background: #f8fafc; border-radius: 16px; }
+        .filter-bar label { font-weight: bold; }
+        .filter-bar select { width: 180px; margin-bottom: 0; }
+        .search-container { position: relative; }
+        .search-results { position: absolute; background: white; border: 1px solid #ccc; max-height: 200px; overflow-y: auto; width: 100%; z-index: 1000; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .search-result-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
+        .search-result-item:hover { background: #f0f0f0; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; border-radius: 24px; padding: 25px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+        .modal-content h3 { margin-bottom: 20px; }
+        .modal-content input, .modal-content select, .modal-content textarea { margin-bottom: 15px; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .login-box { background: white; border-radius: 30px; padding: 30px; width: 90%; max-width: 380px; text-align: center; }
+        .login-box input { margin: 12px 0; padding: 12px; width: 100%; }
+        .login-box h2 { margin-bottom: 20px; color: #1e4a76; }
+        .remember-me { display: flex; align-items: center; justify-content: flex-start; gap: 10px; margin: 10px 0; }
+        .remember-me input { width: auto; margin: 0; }
+        .user-info { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; }
+        @media (max-width: 700px) { th, td { font-size: 11px; padding: 5px; } .btn { padding: 4px 10px; font-size: 11px; } }
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .tabs, .btn, .header-card .btn, .form-grid, .alert, .dept-selector, .filter-bar, .search-container, .no-print, .modal, .user-info { display: none !important; }
+            .card { box-shadow: none; padding: 10px; margin: 0; }
+            .tab-content { display: block !important; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ccc; padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- شاشة تسجيل الدخول -->
+<div id="loginOverlay" class="login-overlay">
+    <div class="login-box">
+        <h2>🏥 نظام الهندسة الطبية</h2>
+        <h3>مستشفيات جامعة المنوفية</h3>
+        <input type="text" id="loginUsername" placeholder="اسم المستخدم">
+        <input type="password" id="loginPassword" placeholder="كلمة السر">
+        <div class="remember-me">
+            <input type="checkbox" id="rememberMeCheckbox">
+            <label for="rememberMeCheckbox">تذكرني</label>
+        </div>
+        <button class="btn btn-success" onclick="login()" style="width:100%;">دخول</button>
+        <div id="loginError" style="color:red; margin-top:10px; display:none;">اسم المستخدم أو كلمة السر غير صحيحة</div>
+    </div>
+</div>
+
+<!-- النظام الرئيسي -->
+<div id="mainApp" style="display:none;">
+<div class="container">
+    <div class="card header-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1>🏥 مستشفيات جامعة المنوفية</h1>
+                <h2>الهندسة الطبية</h2>
+                <p style="font-size: 14px; margin-top: 8px;">نظام إدارة الأجهزة والعقود | الأعطال</p>
+            </div>
+            <div class="user-info">
+                <span>👤 <span id="currentUserSpan"></span> (<span id="currentRoleSpan"></span>)</span>
+                <button class="btn btn-danger" onclick="logout()" style="margin-right:10px;">🚪 تسجيل خروج</button>
+            </div>
+        </div>
+        <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn btn-excel" onclick="exportDevicesToExcel()">📎 تصدير الأجهزة إلى Excel</button>
+            <button class="btn btn-excel" onclick="exportAllFaultsToExcel()">📎 تصدير جميع الأعطال إلى Excel</button>
+            <button class="btn btn-danger" onclick="clearAllData()">🗑️ مسح الكل</button>
+        </div>
+    </div>
+
+    <div id="contractAlert" class="alert" style="display:none;"></div>
+
+    <div class="tabs" id="tabsContainer">
+        <button class="tab-btn active" onclick="showTab('dashboard')">📊 لوحة التحكم</button>
+        <button class="tab-btn" onclick="showTab('devices')">🩺 الأجهزة والعقود</button>
+        <button class="tab-btn" onclick="showTab('faults')">🔧 الأعطال النشطة</button>
+        <button class="tab-btn" onclick="showTab('closedFaultsTab')">✅ الأعطال المغلقة</button>
+        <button class="tab-btn" onclick="showTab('users')" id="usersTabBtn" style="display:none;">👥 إدارة المستخدمين</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="tab-content active">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <h3>📈 إحصائيات سريعة</h3>
+                <button class="btn btn-print" onclick="printDashboard()">🖨️ طباعة</button>
+            </div>
+            <div class="stats-row" id="stats"></div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-warning" onclick="showContractAlertsModal()">🔔 عرض تنبيهات العقود</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- الأجهزة والعقود -->
+    <div id="devices" class="tab-content">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <h3>➕ إضافة جهاز وعقد جديد</h3>
+                <button class="btn btn-print" onclick="printDevices()">🖨️ طباعة</button>
+            </div>
+            <div class="dept-selector">
+                <label>🏷️ اختر القسم:</label>
+                <select id="deviceDeptSelect"></select>
+                <input type="text" id="newDeptName" placeholder="اسم قسم جديد" style="width:150px; display:none;">
+            </div>
+            <div class="form-grid">
+                <input type="text" id="deviceName" placeholder="اسم الجهاز *">
+                <input type="text" id="deviceBrand" placeholder="الماركة">
+                <input type="text" id="deviceModel" placeholder="الموديل">
+                <input type="text" id="deviceSN" placeholder="S/N">
+                <input type="text" id="deviceAgent" placeholder="الوكيل">
+                <input type="text" id="contractType" placeholder="نوع العقد">
+                <input type="date" id="contractStart" placeholder="بداية العقد">
+                <input type="date" id="contractEnd" placeholder="نهاية العقد">
+                <input type="text" id="contractStatus" placeholder="حالة العقد">
+                <div><button class="btn btn-success" onclick="addDevice()">➕ إضافة جهاز وعقد</button></div>
+            </div>
+            
+            <div class="filter-bar">
+                <label>🔍 فلتر القسم:</label>
+                <select id="deviceFilterSelect" onchange="renderDevices()"></select>
+                <div class="search-container" style="flex:1;">
+                    <input type="text" id="deviceSearchInput" placeholder="🔍 بحث ذكي في الأجهزة..." onkeyup="searchDevicesTable()" autocomplete="off">
+                </div>
+            </div>
+            
+            <h3>📋 قائمة الأجهزة والعقود</h3>
+            <div class="table-wrapper"><table id="devicesTable"><thead>
+                <th>القسم</th><th>اسم الجهاز</th><th>الماركة</th><th>الموديل</th><th>S/N</th><th>الوكيل</th>
+                <th>نوع العقد</th><th>بداية العقد</th><th>نهاية العقد</th><th>حالة العقد</th><th>تنبيه</th><th>الإجراءات</th>
+            </thead><tbody></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- الأعطال النشطة -->
+    <div id="faults" class="tab-content">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <h3>⚠️ تسجيل عطل جديد</h3>
+                <button class="btn btn-print" onclick="printActiveFaults()">🖨️ طباعة</button>
+            </div>
+            <div class="form-grid">
+                <div class="search-container">
+                    <input type="text" id="searchDeviceInput" placeholder="🔍 بحث عن جهاز (أو اكتب اسم جديد)..." onkeyup="searchDevicesForFault()" autocomplete="off">
+                    <div id="searchResults" class="search-results" style="display: none;"></div>
+                </div>
+                <select id="faultDeptSelect">
+                    <option value="">-- اختر القسم --</option>
+                </select>
+                <input type="text" id="faultBrand" placeholder="الماركة">
+                <input type="text" id="faultModel" placeholder="الموديل">
+                <input type="text" id="faultSN" placeholder="S/N">
+                <textarea id="faultDesc" placeholder="وصف العطل"></textarea>
+                <input type="date" id="faultDate">
+                <textarea id="faultActions" placeholder="الإجراءات"></textarea>
+                <div><button class="btn btn-success" onclick="addFault()">➕ تسجيل العطل</button></div>
+            </div>
+            
+            <div class="filter-bar">
+                <label>🔍 فلتر القسم:</label>
+                <select id="faultFilterSelect" onchange="renderFaults()"></select>
+                <div class="search-container" style="flex:1;">
+                    <input type="text" id="faultTableSearchInput" placeholder="🔍 بحث ذكي في الأعطال..." onkeyup="searchFaultsTable()" autocomplete="off">
+                </div>
+            </div>
+            
+            <h3>⚙️ الأعطال النشطة (غير محلولة)</h3>
+            <div class="table-wrapper"><table id="faultsTable"><thead><th>القسم</th><th>الجهاز</th><th>الماركة</th><th>الموديل</th><th>S/N</th><th>وصف العطل</th><th>تاريخ العطل</th><th>الإجراءات</th><th>الإجراءات</th></thead><tbody></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- الأعطال المغلقة -->
+    <div id="closedFaultsTab" class="tab-content">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <h3>✅ الأعطال المغلقة</h3>
+                <button class="btn btn-print" onclick="printClosedFaults()">🖨️ طباعة</button>
+            </div>
+            
+            <div class="filter-bar">
+                <label>🔍 فلتر القسم:</label>
+                <select id="closedFaultFilterSelect" onchange="renderClosedFaults()"></select>
+                <div class="search-container" style="flex:1;">
+                    <input type="text" id="closedFaultSearchInput" placeholder="🔍 بحث ذكي في الأعطال المغلقة..." onkeyup="searchClosedFaultsTable()" autocomplete="off">
+                </div>
+            </div>
+            
+            <div class="table-wrapper"><table id="closedFaultsTable"><thead><th>القسم</th><th>الجهاز</th><th>الماركة</th><th>الموديل</th><th>S/N</th><th>وصف العطل</th><th>تاريخ العطل</th><th>تاريخ الإغلاق</th><th>الإجراءات</th><th></th></thead><tbody></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- إدارة المستخدمين -->
+    <div id="users" class="tab-content">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <h3>👥 إدارة المستخدمين</h3>
+            </div>
+            <div class="form-grid">
+                <input type="text" id="newUsername" placeholder="اسم المستخدم">
+                <input type="password" id="newPassword" placeholder="كلمة السر">
+                <select id="newRole">
+                    <option value="admin">مدير</option>
+                    <option value="engineer">مهندس</option>
+                    <option value="tech">فني</option>
+                    <option value="viewer">مشاهد</option>
+                </select>
+                <button class="btn btn-success" onclick="addUser()">➕ إضافة مستخدم</button>
+            </div>
+            <h3>📋 قائمة المستخدمين</h3>
+            <div class="table-wrapper"><table id="usersTable"><thead><th>اسم المستخدم</th><th>الصلاحية</th><th>الإجراءات</th></thead><tbody></tbody></tr></div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Modal للتعديل -->
+<div id="editModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3 id="modalTitle">تعديل البيانات</h3>
+        <div id="modalFields"></div>
+        <div class="modal-buttons">
+            <button class="btn btn-success" onclick="saveEdit()">💾 حفظ</button>
+            <button class="btn btn-danger" onclick="closeModal()">❌ إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+    // المستخدمين الافتراضيين
+    let users = [
+        { id: 1, username: 'admin', password: 'admin123', role: 'admin' },
+        { id: 2, username: 'engineer', password: 'eng123', role: 'engineer' },
+        { id: 3, username: 'tech', password: 'tech123', role: 'tech' },
+        { id: 4, username: 'viewer', password: 'view123', role: 'viewer' }
+    ];
+    
+    // الأقسام (تبدأ فارغة)
+    let departments = [];
+    
+    // البيانات
+    let devices = [];
+    let activeFaults = [];
+    let closedFaults = [];
+    
+    let currentUser = null;
+    let editType = null;
+    let editIndex = null;
+    let selectedDeviceForFault = null;
+    let customDeviceForFault = null;
+    
+    // تحميل البيانات وحالة "تذكرني"
+    try {
+        let savedUsers = JSON.parse(localStorage.getItem('users'));
+        if(savedUsers) users = savedUsers;
+        let savedDepts = JSON.parse(localStorage.getItem('departments'));
+        if(savedDepts) departments = savedDepts;
+        devices = JSON.parse(localStorage.getItem('devices')) || [];
+        activeFaults = JSON.parse(localStorage.getItem('activeFaults')) || [];
+        closedFaults = JSON.parse(localStorage.getItem('closedFaults')) || [];
+        
+        let savedUsername = localStorage.getItem('rememberUsername');
+        let savedPassword = localStorage.getItem('rememberPassword');
+        if(savedUsername && savedPassword) {
+            document.getElementById('loginUsername').value = savedUsername;
+            document.getElementById('loginPassword').value = savedPassword;
+            document.getElementById('rememberMeCheckbox').checked = true;
+        }
+    } catch(e) { console.log("خطأ في التحميل"); }
+    
+    function saveAll() {
+        try {
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('departments', JSON.stringify(departments));
+            localStorage.setItem('devices', JSON.stringify(devices));
+            localStorage.setItem('activeFaults', JSON.stringify(activeFaults));
+            localStorage.setItem('closedFaults', JSON.stringify(closedFaults));
+        } catch(e) { alert("خطأ في حفظ البيانات"); }
+        renderAll();
+    }
+    
+    // تسجيل الدخول
+    window.login = function() {
+        let username = document.getElementById('loginUsername').value.trim();
+        let password = document.getElementById('loginPassword').value;
+        let rememberMe = document.getElementById('rememberMeCheckbox').checked;
+        let user = users.find(u => u.username === username && u.password === password);
+        if(user) {
+            currentUser = user;
+            
+            if(rememberMe) {
+                localStorage.setItem('rememberUsername', username);
+                localStorage.setItem('rememberPassword', password);
+            } else {
+                localStorage.removeItem('rememberUsername');
+                localStorage.removeItem('rememberPassword');
+            }
+            
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('currentUserSpan').innerText = currentUser.username;
+            document.getElementById('currentRoleSpan').innerText = 
+                currentUser.role === 'admin' ? 'مدير' : 
+                currentUser.role === 'engineer' ? 'مهندس' : 
+                currentUser.role === 'tech' ? 'فني' : 'مشاهد';
+            
+            if(currentUser.role === 'admin') {
+                document.getElementById('usersTabBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('usersTabBtn').style.display = 'none';
+            }
+            renderAll();
+        } else {
+            document.getElementById('loginError').style.display = 'block';
+        }
+    };
+    
+    window.logout = function() {
+        currentUser = null;
+        document.getElementById('loginOverlay').style.display = 'flex';
+        document.getElementById('mainApp').style.display = 'none';
+    };
+    
+    // تحديث قائمة الأقسام
+    function updateDeptSelects() {
+        let selects = ['deviceDeptSelect', 'deviceFilterSelect', 'faultFilterSelect', 'closedFaultFilterSelect', 'faultDeptSelect'];
+        for(let s=0; s<selects.length; s++) {
+            let select = document.getElementById(selects[s]);
+            if(!select) continue;
+            let currentVal = select.value;
+            select.innerHTML = '';
+            if(selects[s] !== 'deviceDeptSelect') {
+                let allOption = document.createElement('option');
+                allOption.value = 'الكل';
+                allOption.textContent = 'الكل';
+                select.appendChild(allOption);
+            }
+            for(let i=0; i<departments.length; i++) {
+                let option = document.createElement('option');
+                option.value = departments[i];
+                option.textContent = departments[i];
+                select.appendChild(option);
+            }
+            if(selects[s] === 'deviceDeptSelect') {
+                let newOption = document.createElement('option');
+                newOption.value = '--- قسم جديد ---';
+                newOption.textContent = '--- قسم جديد ---';
+                select.appendChild(newOption);
+            }
+            if(currentVal && (currentVal === 'الكل' || departments.includes(currentVal) || currentVal === '--- قسم جديد ---')) {
+                select.value = currentVal;
+            } else if(selects[s] !== 'deviceDeptSelect') {
+                select.value = 'الكل';
+            }
+        }
+    }
+    
+    function addDepartment(deptName) {
+        if(!deptName) return;
+        if(!departments.includes(deptName)) {
+            departments.push(deptName);
+            saveAll();
+            updateDeptSelects();
+        }
+    }
+    
+    setTimeout(function() {
+        let deptSelect = document.getElementById('deviceDeptSelect');
+        let newDeptInput = document.getElementById('newDeptName');
+        if(deptSelect) {
+            deptSelect.addEventListener('change', function() {
+                if(newDeptInput) {
+                    newDeptInput.style.display = this.value === '--- قسم جديد ---' ? 'inline-block' : 'none';
+                }
+            });
+        }
+    }, 100);
+    
+    function isExpired(endDate) {
+        if(!endDate) return false;
+        try {
+            let end = new Date(endDate);
+            let today = new Date();
+            today.setHours(0,0,0,0);
+            return end < today;
+        } catch(e) { return false; }
+    }
+    
+    function isExpiringSoon(endDate) {
+        if(!endDate) return false;
+        try {
+            let end = new Date(endDate);
+            let today = new Date();
+            today.setHours(0,0,0,0);
+            let diffDays = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+            return diffDays <= 90 && diffDays >= 0;
+        } catch(e) { return false; }
+    }
+    
+    function getDaysRemaining(endDate) {
+        if(!endDate) return null;
+        try {
+            let end = new Date(endDate);
+            let today = new Date();
+            today.setHours(0,0,0,0);
+            return Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+        } catch(e) { return null; }
+    }
+    
+    function hasWritePermission() {
+        return currentUser.role === 'admin' || currentUser.role === 'engineer' || currentUser.role === 'tech';
+    }
+    
+    function hasDeletePermission() {
+        return currentUser.role === 'admin';
+    }
+    
+    // إضافة جهاز
+    window.addDevice = function() {
+        if(!hasWritePermission()) { alert('ليس لديك صلاحية لإضافة جهاز'); return; }
+        let deptSelect = document.getElementById('deviceDeptSelect');
+        let newDeptInput = document.getElementById('newDeptName');
+        let dept = deptSelect.value;
+        if(dept === '--- قسم جديد ---') {
+            dept = newDeptInput.value.trim();
+            if(!dept) { alert('أدخل اسم القسم الجديد'); return; }
+            addDepartment(dept);
+        }
+        let name = document.getElementById('deviceName').value.trim();
+        if(!name) { alert('أدخل اسم الجهاز'); return; }
+        
+        devices.push({
+            dept: dept,
+            name: name,
+            brand: document.getElementById('deviceBrand').value.trim(),
+            model: document.getElementById('deviceModel').value.trim(),
+            sn: document.getElementById('deviceSN').value.trim(),
+            agent: document.getElementById('deviceAgent').value.trim(),
+            contractType: document.getElementById('contractType').value.trim(),
+            contractStart: document.getElementById('contractStart').value,
+            contractEnd: document.getElementById('contractEnd').value,
+            contractStatus: document.getElementById('contractStatus').value.trim()
+        });
+        saveAll();
+        document.getElementById('deviceName').value = '';
+        document.getElementById('deviceBrand').value = '';
+        document.getElementById('deviceModel').value = '';
+        document.getElementById('deviceSN').value = '';
+        document.getElementById('deviceAgent').value = '';
+        document.getElementById('contractType').value = '';
+        document.getElementById('contractStart').value = '';
+        document.getElementById('contractEnd').value = '';
+        document.getElementById('contractStatus').value = '';
+        if(newDeptInput) newDeptInput.value = '';
+        alert('✅ تم إضافة الجهاز والعقد');
+    };
+    
+    // بحث الأجهزة للأعطال
+    window.searchDevicesForFault = function() {
+        let searchTerm = document.getElementById('searchDeviceInput').value.toLowerCase().trim();
+        let resultsDiv = document.getElementById('searchResults');
+        
+        if(searchTerm === '') {
+            resultsDiv.style.display = 'none';
+            customDeviceForFault = null;
+            selectedDeviceForFault = null;
+            return;
+        }
+        
+        let filtered = devices.filter(d => 
+            d.name.toLowerCase().includes(searchTerm) ||
+            d.brand.toLowerCase().includes(searchTerm) ||
+            d.model.toLowerCase().includes(searchTerm) ||
+            d.dept.toLowerCase().includes(searchTerm) ||
+            d.sn.toLowerCase().includes(searchTerm)
+        );
+        
+        let html = '';
+        if(filtered.length === 0) {
+            html += '<div class="search-result-item" style="color: #e67e22;" onclick="useCustomDevice()">' +
+                '<strong>➕ إضافة جهاز جديد: "' + searchTerm + '"</strong><br>' +
+                '<small>الجهاز غير مسجل، اضغط للإضافة كجهاز جديد</small>' +
+                '</div>';
+        } else {
+            for(let i=0; i<filtered.length; i++) {
+                html += '<div class="search-result-item" onclick="selectDeviceForFault(\'' + filtered[i].name.replace(/'/g, "\\'") + '\')">' +
+                    '<strong>' + filtered[i].name + '</strong><br>' +
+                    '<small>' + filtered[i].dept + ' | ' + filtered[i].brand + ' | ' + filtered[i].model + '</small>' +
+                    '</div>';
+            }
+            html += '<div class="search-result-item" style="color: #e67e22; border-top: 1px solid #ddd;" onclick="useCustomDevice()">' +
+                '<strong>➕ إضافة جهاز جديد: "' + searchTerm + '"</strong>' +
+                '</div>';
+        }
+        resultsDiv.innerHTML = html;
+        resultsDiv.style.display = 'block';
+    };
+    
+    window.selectDeviceForFault = function(deviceName) {
+        let device = devices.find(d => d.name === deviceName);
+        if(device) {
+            document.getElementById('searchDeviceInput').value = device.name;
+            document.getElementById('faultDeptSelect').value = device.dept || '';
+            document.getElementById('faultBrand').value = device.brand || '';
+            document.getElementById('faultModel').value = device.model || '';
+            document.getElementById('faultSN').value = device.sn || '';
+            selectedDeviceForFault = device;
+            customDeviceForFault = null;
+        }
+        document.getElementById('searchResults').style.display = 'none';
+    };
+    
+    window.useCustomDevice = function() {
+        let newDeviceName = document.getElementById('searchDeviceInput').value.trim();
+        if(newDeviceName) {
+            customDeviceForFault = { name: newDeviceName, brand: '', model: '', sn: '', dept: '' };
+            selectedDeviceForFault = null;
+            document.getElementById('faultDeptSelect').value = '';
+            document.getElementById('faultBrand').value = '';
+            document.getElementById('faultModel').value = '';
+            document.getElementById('faultSN').value = '';
+            alert('سيتم إضافة الجهاز "' + newDeviceName + '" كجهاز جديد عند تسجيل العطل');
+        }
+        document.getElementById('searchResults').style.display = 'none';
+    };
+    
+    // إضافة عطل
+    window.addFault = function() {
+        if(!hasWritePermission()) { alert('ليس لديك صلاحية لإضافة عطل'); return; }
+        let deviceName, deviceDept, deviceBrand, deviceModel, deviceSN;
+        
+        if(selectedDeviceForFault) {
+            deviceName = selectedDeviceForFault.name;
+            deviceDept = selectedDeviceForFault.dept;
+            deviceBrand = selectedDeviceForFault.brand;
+            deviceModel = selectedDeviceForFault.model;
+            deviceSN = selectedDeviceForFault.sn;
+        } else if(customDeviceForFault) {
+            deviceName = customDeviceForFault.name;
+            deviceDept = document.getElementById('faultDeptSelect').value;
+            deviceBrand = document.getElementById('faultBrand').value;
+            deviceModel = document.getElementById('faultModel').value;
+            deviceSN = document.getElementById('faultSN').value;
+        } else {
+            deviceName = document.getElementById('searchDeviceInput').value.trim();
+            if(!deviceName) { alert('أدخل اسم الجهاز أو اختره من القائمة'); return; }
+            deviceDept = document.getElementById('faultDeptSelect').value;
+            deviceBrand = document.getElementById('faultBrand').value;
+            deviceModel = document.getElementById('faultModel').value;
+            deviceSN = document.getElementById('faultSN').value;
+        }
+        
+        if(!deviceName) { alert('أدخل اسم الجهاز'); return; }
+        
+        activeFaults.push({
+            dept: deviceDept,
+            device: deviceName,
+            brand: deviceBrand,
+            model: deviceModel,
+            sn: deviceSN,
+            desc: document.getElementById('faultDesc').value.trim(),
+            date: document.getElementById('faultDate').value || new Date().toISOString().split('T')[0],
+            actions: document.getElementById('faultActions').value.trim()
+        });
+        
+        if(!selectedDeviceForFault && customDeviceForFault) {
+            devices.push({
+                dept: deviceDept || 'عام',
+                name: deviceName,
+                brand: deviceBrand,
+                model: deviceModel,
+                sn: deviceSN,
+                agent: '',
+                contractType: '',
+                contractStart: '',
+                contractEnd: '',
+                contractStatus: ''
+            });
+            addDepartment(deviceDept);
+        }
+        
+        saveAll();
+        document.getElementById('faultDesc').value = '';
+        document.getElementById('faultDate').value = '';
+        document.getElementById('faultActions').value = '';
+        document.getElementById('searchDeviceInput').value = '';
+        document.getElementById('faultDeptSelect').value = '';
+        document.getElementById('faultBrand').value = '';
+        document.getElementById('faultModel').value = '';
+        document.getElementById('faultSN').value = '';
+        selectedDeviceForFault = null;
+        customDeviceForFault = null;
+        alert('✅ تم تسجيل العطل');
+    };
+    
+    // إغلاق العطل
+    window.closeFault = function(index) {
+        let fault = activeFaults[index];
+        let closedRecord = { 
+            dept: fault.dept || '',
+            device: fault.device,
+            brand: fault.brand,
+            model: fault.model,
+            sn: fault.sn,
+            desc: fault.desc,
+            date: fault.date,
+            actions: fault.actions,
+            closedDate: new Date().toISOString().split('T')[0]
+        };
+        closedFaults.push(closedRecord);
+        activeFaults.splice(index, 1);
+        saveAll();
+        alert('✅ تم إغلاق العطل بنجاح');
+    };
+    
+    // حذف
+    window.deleteDevice = function(index) { 
+        if(!hasDeletePermission()) { alert('ليس لديك صلاحية للحذف'); return; }
+        if(confirm('⚠️ هل أنت متأكد من حذف هذا الجهاز والعقد؟')) { 
+            devices.splice(index,1); 
+            saveAll(); 
+            alert('✅ تم الحذف');
+        } 
+    };
+    
+    // تعديل
+    window.editDevice = function(index) {
+        if(!hasWritePermission()) { alert('ليس لديك صلاحية للتعديل'); return; }
+        editType = 'device';
+        editIndex = index;
+        let d = devices[index];
+        showModal('تعديل جهاز وعقد', [
+            {label: 'القسم', type: 'text', id: 'edit_dept', value: d.dept || ''},
+            {label: 'اسم الجهاز', type: 'text', id: 'edit_name', value: d.name || ''},
+            {label: 'الماركة', type: 'text', id: 'edit_brand', value: d.brand || ''},
+            {label: 'الموديل', type: 'text', id: 'edit_model', value: d.model || ''},
+            {label: 'S/N', type: 'text', id: 'edit_sn', value: d.sn || ''},
+            {label: 'الوكيل', type: 'text', id: 'edit_agent', value: d.agent || ''},
+            {label: 'نوع العقد', type: 'text', id: 'edit_contractType', value: d.contractType || ''},
+            {label: 'بداية العقد', type: 'date', id: 'edit_contractStart', value: d.contractStart || ''},
+            {label: 'نهاية العقد', type: 'date', id: 'edit_contractEnd', value: d.contractEnd || ''},
+            {label: 'حالة العقد', type: 'text', id: 'edit_contractStatus', value: d.contractStatus || ''}
+        ]);
+    };
+    
+    window.editFault = function(index) {
+        if(!hasWritePermission()) { alert('ليس لديك صلاحية للتعديل'); return; }
+        editType = 'fault';
+        editIndex = index;
+        let f = activeFaults[index];
+        showModal('تعديل عطل', [
+            {label: 'القسم', type: 'text', id: 'edit_dept', value: f.dept || ''},
+            {label: 'الجهاز', type: 'text', id: 'edit_device', value: f.device || ''},
+            {label: 'الماركة', type: 'text', id: 'edit_brand', value: f.brand || ''},
+            {label: 'الموديل', type: 'text', id: 'edit_model', value: f.model || ''},
+            {label: 'S/N', type: 'text', id: 'edit_sn', value: f.sn || ''},
+            {label: 'وصف العطل', type: 'textarea', id: 'edit_desc', value: f.desc || ''},
+            {label: 'تاريخ العطل', type: 'date', id: 'edit_date', value: f.date || ''},
+            {label: 'الإجراءات', type: 'textarea', id: 'edit_actions', value: f.actions || ''}
+        ]);
+    };
+    
+    window.editClosedFault = function(index) {
+        if(!hasWritePermission()) { alert('ليس لديك صلاحية للتعديل'); return; }
+        editType = 'closedFault';
+        editIndex = index;
+        let f = closedFaults[index];
+        showModal('تعديل عطل مغلق', [
+            {label: 'القسم', type: 'text', id: 'edit_dept', value: f.dept || ''},
+            {label: 'الجهاز', type: 'text', id: 'edit_device', value: f.device || ''},
+            {label: 'الماركة', type: 'text', id: 'edit_brand', value: f.brand || ''},
+            {label: 'الموديل', type: 'text', id: 'edit_model', value: f.model || ''},
+            {label: 'S/N', type: 'text', id: 'edit_sn', value: f.sn || ''},
+            {label: 'وصف العطل', type: 'textarea', id: 'edit_desc', value: f.desc || ''},
+            {label: 'تاريخ العطل', type: 'date', id: 'edit_date', value: f.date || ''},
+            {label: 'تاريخ الإغلاق', type: 'date', id: 'edit_closedDate', value: f.closedDate || ''},
+            {label: 'الإجراءات', type: 'textarea', id: 'edit_actions', value: f.actions || ''}
+        ]);
+    };
+    
+    function showModal(title, fields) {
+        document.getElementById('modalTitle').innerText = title;
+        let html = '';
+        for(let i=0; i<fields.length; i++) {
+            let f = fields[i];
+            if(f.type === 'textarea') {
+                html += '<label>' + f.label + ':</label><textarea id="' + f.id + '">' + (f.value || '') + '</textarea>';
+            } else {
+                html += '<label>' + f.label + ':</label><input type="' + f.type + '" id="' + f.id + '" value="' + (f.value || '') + '">';
+            }
+        }
+        document.getElementById('modalFields').innerHTML = html;
+        document.getElementById('editModal').style.display = 'flex';
+    }
+    
+    window.closeModal = function() {
+        document.getElementById('editModal').style.display = 'none';
+        editType = null;
+        editIndex = null;
+    };
+    
+    window.saveEdit = function() {
+        if(editType === 'device') {
+            devices[editIndex] = {
+                dept: document.getElementById('edit_dept').value,
+                name: document.getElementById('edit_name').value,
+                brand: document.getElementById('edit_brand').value,
+                model: document.getElementById('edit_model').value,
+                sn: document.getElementById('edit_sn').value,
+                agent: document.getElementById('edit_agent').value,
+                contractType: document.getElementById('edit_contractType').value,
+                contractStart: document.getElementById('edit_contractStart').value,
+                contractEnd: document.getElementById('edit_contractEnd').value,
+                contractStatus: document.getElementById('edit_contractStatus').value
+            };
+        } else if(editType === 'fault') {
+            activeFaults[editIndex] = {
+                dept: document.getElementById('edit_dept').value,
+                device: document.getElementById('edit_device').value,
+                brand: document.getElementById('edit_brand').value,
+                model: document.getElementById('edit_model').value,
+                sn: document.getElementById('edit_sn').value,
+                desc: document.getElementById('edit_desc').value,
+                date: document.getElementById('edit_date').value,
+                actions: document.getElementById('edit_actions').value
+            };
+        } else if(editType === 'closedFault') {
+            closedFaults[editIndex] = {
+                dept: document.getElementById('edit_dept').value,
+                device: document.getElementById('edit_device').value,
+                brand: document.getElementById('edit_brand').value,
+                model: document.getElementById('edit_model').value,
+                sn: document.getElementById('edit_sn').value,
+                desc: document.getElementById('edit_desc').value,
+                date: document.getElementById('edit_date').value,
+                closedDate: document.getElementById('edit_closedDate').value,
+                actions: document.getElementById('edit_actions').value
+            };
+        }
+        closeModal();
+        saveAll();
+        alert('✅ تم التعديل بنجاح');
+    };
+    
+    // البحث الذكي في الجداول
+    window.searchDevicesTable = function() {
+        let searchTerm = document.getElementById('deviceSearchInput').value.toLowerCase().trim();
+        let rows = document.querySelectorAll('#devicesTable tbody tr');
+        for(let i=0; i<rows.length; i++) {
+            let text = rows[i].innerText.toLowerCase();
+            rows[i].style.display = (searchTerm === '' || text.includes(searchTerm)) ? '' : 'none';
+        }
+    };
+    
+    window.searchFaultsTable = function() {
+        let searchTerm = document.getElementById('faultTableSearchInput').value.toLowerCase().trim();
+        let rows = document.querySelectorAll('#faultsTable tbody tr');
+        for(let i=0; i<rows.length; i++) {
+            let text = rows[i].innerText.toLowerCase();
+            rows[i].style.display = (searchTerm === '' || text.includes(searchTerm)) ? '' : 'none';
+        }
+    };
+    
+    window.searchClosedFaultsTable = function() {
+        let searchTerm = document.getElementById('closedFaultSearchInput').value.toLowerCase().trim();
+        let rows = document.querySelectorAll('#closedFaultsTable tbody tr');
+        for(let i=0; i<rows.length; i++) {
+            let text = rows[i].innerText.toLowerCase();
+            rows[i].style.display = (searchTerm === '' || text.includes(searchTerm)) ? '' : 'none';
+        }
+    };
+    
+    // عرض البيانات
+    window.renderDevices = function() {
+        let filterDept = document.getElementById('deviceFilterSelect') ? document.getElementById('deviceFilterSelect').value : 'الكل';
+        let filteredDevices = (filterDept === 'الكل') ? devices : devices.filter(d => d.dept === filterDept);
+        let html = '';
+        for(let i = 0; i < filteredDevices.length; i++) {
+            let d = filteredDevices[i];
+            let originalIndex = devices.indexOf(d);
+            let expired = isExpired(d.contractEnd);
+            let expiring = !expired && isExpiringSoon(d.contractEnd);
+            let rowClass = expired ? 'expired-row' : (expiring ? 'warning-row' : '');
+            let daysRemaining = getDaysRemaining(d.contractEnd);
+            let alertText = '';
+            if(!d.contractEnd) alertText = '-';
+            else if(expired) alertText = '❌ منتهي';
+            else if(expiring) alertText = '⚠️ ينتهي خلال ' + daysRemaining + ' يوم';
+            else alertText = '✅ ساري';
+            
+            html += '<tr class="' + rowClass + '">' +
+                '<td>' + (d.dept || '-') + '</td>' +
+                '<td>' + (d.name || '-') + '</td>' +
+                '<td>' + (d.brand || '-') + '</td>' +
+                '<td>' + (d.model || '-') + '</td>' +
+                '<td>' + (d.sn || '-') + '</td>' +
+                '<td>' + (d.agent || '-') + '</td>' +
+                '<td>' + (d.contractType || '-') + '</td>' +
+                '<td>' + (d.contractStart || '-') + '</td>' +
+                '<td>' + (d.contractEnd || '-') + '</td>' +
+                '<td>' + (d.contractStatus || '-') + '</td>' +
+                '<td>' + alertText + '</td>' +
+                '<td>' +
+                (hasWritePermission() ? '<button class="btn btn-edit" onclick="editDevice(' + originalIndex + ')">✏️ تعديل</button>' : '') +
+                (hasDeletePermission() ? '<button class="btn btn-danger" onclick="deleteDevice(' + originalIndex + ')">🗑️ حذف</button>' : '') +
+                '</td>' +
+            '</tr>';
+        }
+        let tbody = document.querySelector('#devicesTable tbody');
+        if(tbody) tbody.innerHTML = html || '<tr><td colspan="12">لا توجد أجهزة أو عقود</td></tr>';
+    };
+    
+    window.renderFaults = function() {
+        let filterDept = document.getElementById('faultFilterSelect') ? document.getElementById('faultFilterSelect').value : 'الكل';
+        let filteredFaults = (filterDept === 'الكل') ? activeFaults : activeFaults.filter(f => f.dept === filterDept);
+        let html = '';
+        for(let i = 0; i < filteredFaults.length; i++) {
+            let f = filteredFaults[i];
+            let originalIndex = activeFaults.indexOf(f);
+            html += '<tr>' +
+                '<td>' + (f.dept || '-') + '</td>' +
+                '<td>' + (f.device || '-') + '</td>' +
+                '<td>' + (f.brand || '-') + '</td>' +
+                '<td>' + (f.model || '-') + '</td>' +
+                '<td>' + (f.sn || '-') + '</td>' +
+                '<td>' + (f.desc || '-') + '</td>' +
+                '<td>' + (f.date || '-') + '</td>' +
+                '<td>' + (f.actions || '-') + '</td>' +
+                '<td>' +
+                (hasWritePermission() ? '<button class="btn btn-edit" onclick="editFault(' + originalIndex + ')">✏️ تعديل</button>' : '') +
+                '<button class="btn btn-close" onclick="closeFault(' + originalIndex + ')">🔒 إصلاح وإغلاق</button>' +
+                '</td>' +
+            '</tr>';
+        }
+        let tbody = document.querySelector('#faultsTable tbody');
+        if(tbody) tbody.innerHTML = html || '<tr><td colspan="9">لا توجد أعطال نشطة</td></tr>';
+    };
+    
+    window.renderClosedFaults = function() {
+        let filterDept = document.getElementById('closedFaultFilterSelect') ? document.getElementById('closedFaultFilterSelect').value : 'الكل';
+        let filteredFaults = (filterDept === 'الكل') ? closedFaults : closedFaults.filter(f => f.dept === filterDept);
+        let html = '';
+        for(let i = 0; i < filteredFaults.length; i++) {
+            let f = filteredFaults[i];
+            let originalIndex = closedFaults.indexOf(f);
+            html += '<tr class="closed-row">' +
+                '<td>' + (f.dept || '-') + '</td>' +
+                '<td>' + (f.device || '-') + '</td>' +
+                '<td>' + (f.brand || '-') + '</td>' +
+                '<td>' + (f.model || '-') + '</td>' +
+                '<td>' + (f.sn || '-') + '</td>' +
+                '<td>' + (f.desc || '-') + '</td>' +
+                '<td>' + (f.date || '-') + '</td>' +
+                '<td>' + (f.closedDate || '-') + '</td>' +
+                '<td>' + (f.actions || '-') + '</td>' +
+                '<td>' + (hasWritePermission() ? '<button class="btn btn-edit" onclick="editClosedFault(' + originalIndex + ')">✏️ تعديل</button>' : '') + '</td>' +
+            '</tr>';
+        }
+        let tbody = document.querySelector('#closedFaultsTable tbody');
+        if(tbody) tbody.innerHTML = html || '<tr><td colspan="10">لا توجد أعطال مغلقة</td></tr>';
+    };
+    
+    function renderStats() {
+        let expiringCount = devices.filter(d => d.contractEnd && !isExpired(d.contractEnd) && isExpiringSoon(d.contractEnd)).length;
+        let expiredCount = devices.filter(d => d.contractEnd && isExpired(d.contractEnd)).length;
+        let statsDiv = document.getElementById('stats');
+        if(statsDiv) {
+            statsDiv.innerHTML = 
+                '<div class="stat-box"><h3>🩺 الأجهزة والعقود</h3><h2>' + devices.length + '</h2></div>' +
+                '<div class="stat-box"><h3>🔧 أعطال نشطة</h3><h2>' + activeFaults.length + '</h2></div>' +
+                '<div class="stat-box"><h3>✅ أعطال مغلقة</h3><h2>' + closedFaults.length + '</h2></div>' +
+                '<div class="stat-box"><h3>⚠️ عقود تنتهي قريباً</h3><h2>' + expiringCount + '</h2></div>' +
+                '<div class="stat-box"><h3>❌ عقود منتهية</h3><h2>' + expiredCount + '</h2></div>';
+        }
+    }
+    
+    function checkContractAlerts() {
+        let expiringContracts = devices.filter(d => d.contractEnd && !isExpired(d.contractEnd) && isExpiringSoon(d.contractEnd));
+        let alertDiv = document.getElementById('contractAlert');
+        if(alertDiv) {
+            if(expiringContracts.length > 0) {
+                let contractNames = '';
+                for(let i = 0; i < expiringContracts.length; i++) {
+                    let days = getDaysRemaining(expiringContracts[i].contractEnd);
+                    if(i > 0) contractNames += ', ';
+                    contractNames += expiringContracts[i].name + ' (باقي ' + days + ' يوم)';
+                }
+                alertDiv.innerHTML = '⚠️ تنبيه: ' + expiringContracts.length + ' عقد سينتهي خلال 3 شهور أو أقل: ' + contractNames;
+                alertDiv.style.display = 'block';
+                alertDiv.classList.add('alert-danger');
+            } else {
+                alertDiv.style.display = 'none';
+            }
+        }
+    }
+    
+    window.showContractAlertsModal = function() {
+        let expiringContracts = devices.filter(d => d.contractEnd && !isExpired(d.contractEnd) && isExpiringSoon(d.contractEnd));
+        let expiredContracts = devices.filter(d => d.contractEnd && isExpired(d.contractEnd));
+        
+        let message = '📋 تقرير العقود\n\n';
+        message += '⚠️ العقود المنتهية قريباً (خلال 3 شهور):\n';
+        if(expiringContracts.length === 0) message += '  - لا يوجد\n';
+        else {
+            for(let i=0; i<expiringContracts.length; i++) {
+                let days = getDaysRemaining(expiringContracts[i].contractEnd);
+                message += '  - ' + expiringContracts[i].name + ' (باقي ' + days + ' يوم)\n';
+            }
+        }
+        message += '\n❌ العقود المنتهية:\n';
+        if(expiredContracts.length === 0) message += '  - لا يوجد\n';
+        else {
+            for(let i=0; i<expiredContracts.length; i++) {
+                message += '  - ' + expiredContracts[i].name + '\n';
+            }
+        }
+        alert(message);
+    };
+    
+    // إدارة المستخدمين
+    window.addUser = function() {
+        if(currentUser.role !== 'admin') { alert('ليس لديك صلاحية لإضافة مستخدمين'); return; }
+        let username = document.getElementById('newUsername').value.trim();
+        let password = document.getElementById('newPassword').value;
+        let role = document.getElementById('newRole').value;
+        if(!username || !password) { alert('أدخل اسم المستخدم وكلمة السر'); return; }
+        if(users.find(u => u.username === username)) { alert('اسم المستخدم موجود بالفعل'); return; }
+        let newId = Math.max(...users.map(u => u.id), 0) + 1;
+        users.push({ id: newId, username, password, role });
+        saveAll();
+        document.getElementById('newUsername').value = '';
+        document.getElementById('newPassword').value = '';
+        renderUsers();
+        alert('✅ تم إضافة المستخدم');
+    };
+    
+    window.deleteUser = function(id) {
+        if(currentUser.role !== 'admin') { alert('ليس لديك صلاحية لحذف مستخدمين'); return; }
+        if(confirm('⚠️ هل أنت متأكد من حذف هذا المستخدم؟')) {
+            if(users.find(u => u.id === id)?.username === currentUser.username) {
+                alert('لا يمكن حذف المستخدم الحالي');
+                return;
+            }
+            users = users.filter(u => u.id !== id);
+            saveAll();
+            renderUsers();
+            alert('✅ تم حذف المستخدم');
+        }
+    };
+    
+    window.editUser = function(id) {
+        if(currentUser.role !== 'admin') { alert('ليس لديك صلاحية لتعديل المستخدمين'); return; }
+        let user = users.find(u => u.id === id);
+        let newPassword = prompt('كلمة السر الجديدة (اتركها فارغة إذا لم تريد التغيير):', '');
+        if(newPassword !== null && newPassword !== '') {
+            user.password = newPassword;
+            saveAll();
+            renderUsers();
+            alert('✅ تم تغيير كلمة السر');
+        }
+        let newRole = prompt('الصلاحية الجديدة (admin/engineer/tech/viewer):', user.role);
+        if(newRole && ['admin','engineer','tech','viewer'].includes(newRole)) {
+            user.role = newRole;
+            saveAll();
+            renderUsers();
+            alert('✅ تم تغيير الصلاحية');
+        }
+    };
+    
+    function renderUsers() {
+        let html = '';
+        for(let i=0; i<users.length; i++) {
+            let u = users[i];
+            let roleName = u.role === 'admin' ? 'مدير' : u.role === 'engineer' ? 'مهندس' : u.role === 'tech' ? 'فني' : 'مشاهد';
+            html += '<tr>' +
+                '<td>' + u.username + '</td>' +
+                '<td>' + roleName + '</td>' +
+                '<td>' +
+                    '<button class="btn btn-edit" onclick="editUser(' + u.id + ')">✏️ تعديل</button>' +
+                    '<button class="btn btn-danger" onclick="deleteUser(' + u.id + ')">🗑️ حذف</button>' +
+                '</td>' +
+            '</tr>';
+        }
+        let tbody = document.querySelector('#usersTable tbody');
+        if(tbody) tbody.innerHTML = html || '<tr><td colspan="3">لا توجد مستخدمين</td></tr>';
+    }
+    
+    // تصدير إلى Excel
+    function exportToExcel(data, sheetName, fileName) {
+        if(data.length === 0) {
+            alert('لا توجد بيانات للتصدير');
+            return;
+        }
+        let ws = XLSX.utils.json_to_sheet(data);
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        XLSX.writeFile(wb, fileName + '.xlsx');
+    }
+    
+    window.exportDevicesToExcel = function() {
+        let exportData = devices.map(d => ({
+            'القسم': d.dept,
+            'اسم الجهاز': d.name,
+            'الماركة': d.brand,
+            'الموديل': d.model,
+            'S/N': d.sn,
+            'الوكيل': d.agent,
+            'نوع العقد': d.contractType,
+            'بداية العقد': d.contractStart,
+            'نهاية العقد': d.contractEnd,
+            'حالة العقد': d.contractStatus
+        }));
+        exportToExcel(exportData, 'الأجهزة_والعقود', 'الاجهزة_والعقود');
+    };
+    
+    window.exportAllFaultsToExcel = function() {
+        let activeData = activeFaults.map(f => ({
+            'النوع': 'نشط',
+            'القسم': f.dept,
+            'الجهاز': f.device,
+            'الماركة': f.brand,
+            'الموديل': f.model,
+            'S/N': f.sn,
+            'وصف العطل': f.desc,
+            'تاريخ العطل': f.date,
+            'تاريخ الإغلاق': '-',
+            'الإجراءات': f.actions
+        }));
+        let closedData = closedFaults.map(f => ({
+            'النوع': 'مغلق',
+            'القسم': f.dept,
+            'الجهاز': f.device,
+            'الماركة': f.brand,
+            'الموديل': f.model,
+            'S/N': f.sn,
+            'وصف العطل': f.desc,
+            'تاريخ العطل': f.date,
+            'تاريخ الإغلاق': f.closedDate,
+            'الإجراءات': f.actions
+        }));
+        let allFaults = [...activeData, ...closedData];
+        exportToExcel(allFaults, 'جميع_الأعطال', 'جميع_الاعطال');
+    };
+    
+    window.clearAllData = function() {
+        if(!hasDeletePermission()) { alert('ليس لديك صلاحية لمسح البيانات'); return; }
+        if(confirm('⚠️ هل أنت متأكد من مسح جميع البيانات؟ لا يمكن التراجع.')) {
+            devices = []; activeFaults = []; closedFaults = [];
+            saveAll();
+            alert('🗑️ تم مسح جميع البيانات');
+        }
+    };
+    
+    // الطباعة
+    window.printDashboard = function() { printReport('لوحة التحكم', document.getElementById('stats').innerHTML); };
+    window.printDevices = function() { printTableReport('قائمة الأجهزة والعقود', '#devicesTable'); };
+    window.printActiveFaults = function() { printTableReport('تقرير الأعطال النشطة', '#faultsTable'); };
+    window.printClosedFaults = function() { printTableReport('تقرير الأعطال المغلقة', '#closedFaultsTable'); };
+    
+    function printTableReport(title, tableSelector) {
+        let printWindow = window.open('', '_blank');
+        let now = new Date().toLocaleString('ar-EG');
+        let originalTable = document.querySelector(tableSelector);
+        let clonedTable = originalTable.cloneNode(true);
+        let buttons = clonedTable.querySelectorAll('.btn');
+        for(let i=0; i<buttons.length; i++) buttons[i].remove();
+        printWindow.document.write('<html dir="rtl"><head><title>' + title + '</title>' +
+            '<style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ccc;padding:8px;text-align:right;}th{background:#f0f0f0;}</style>' +
+            '</head><body>' +
+            '<h2>🏥 مستشفيات جامعة المنوفية - الهندسة الطبية</h2>' +
+            '<h3>📋 ' + title + '</h3>' +
+            '<p>تاريخ التقرير: ' + now + '</p>' +
+            clonedTable.outerHTML +
+            '</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+    
+    function printReport(title, content) {
+        let printWindow = window.open('', '_blank');
+        let now = new Date().toLocaleString('ar-EG');
+        printWindow.document.write('<html dir="rtl"><head><title>' + title + '</title>' +
+            '<style>body{font-family:Arial;padding:20px;}</style>' +
+            '</head><body>' +
+            '<h2>🏥 مستشفيات جامعة المنوفية - الهندسة الطبية</h2>' +
+            '<h3>📋 ' + title + '</h3>' +
+            '<p>تاريخ التقرير: ' + now + '</p>' +
+            '<div>' + content + '</div>' +
+            '</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+    
+    window.showTab = function(tabId) {
+        let tabs = document.querySelectorAll('.tab-content');
+        for(let i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+        document.getElementById(tabId).classList.add('active');
+        let btns = document.querySelectorAll('.tab-btn');
+        for(let i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+        if(event && event.target) event.target.classList.add('active');
+        if(tabId === 'users') renderUsers();
+        let searchInputs = ['deviceSearchInput', 'faultTableSearchInput', 'closedFaultSearchInput'];
+        for(let i=0; i<searchInputs.length; i++) {
+            let input = document.getElementById(searchInputs[i]);
+            if(input) input.value = '';
+        }
+    };
+    
+    function renderAll() { 
+        renderDevices(); 
+        renderFaults(); 
+        renderClosedFaults(); 
+        renderStats(); 
+        updateDeptSelects();
+        checkContractAlerts();
+    }
+    
+    // بيانات تجريبية
+    if(devices.length === 0) {
+        let futureDate = new Date();
+        futureDate.setMonth(futureDate.getMonth() + 2);
+        devices.push({
+            dept: 'العناية المركزة',
+            name: 'جهاز تنفس صناعي',
+            brand: 'دراجر',
+            model: 'Oxylog 3000',
+            sn: 'SN001',
+            agent: 'دراجر مصر',
+            contractType: 'صيانة شاملة',
+            contractStart: '2025-01-01',
+            contractEnd: futureDate.toISOString().split('T')[0],
+            contractStatus: 'ساري'
+        });
+        saveAll();
+    }
+    
+    renderAll();
+</script>
+</body>
+</html>
