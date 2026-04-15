@@ -330,6 +330,302 @@
     <!-- إدارة المستخدمين -->
     <div id="users" class="tab-content">
         <div class="card">
+                                                                .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; justify-content: center; }
+        .tab-btn { background: white; border: none; padding: 10px 22px; border-radius: 50px; font-size: 14px; font-weight: 500; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .tab-btn.active { background: #1e4a76; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; align-items: end; }
+        .stats-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+        .stat-box { background: #f8fafc; padding: 18px 25px; border-radius: 28px; flex: 1; text-align: center; border: 1px solid #e2edf7; }
+        .dept-selector { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .dept-selector label { font-weight: bold; font-size: 16px; }
+        .dept-selector select { width: 250px; margin-bottom: 0; }
+        .filter-bar { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; padding: 10px; background: #f8fafc; border-radius: 16px; }
+        .filter-bar label { font-weight: bold; }
+        .filter-bar select { width: 180px; margin-bottom: 0; }
+        .search-container { position: relative; }
+        .search-results { position: absolute; background: white; border: 1px solid #ccc; max-height: 200px; overflow-y: auto; width: 100%; z-index: 1000; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .search-result-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; transition: background 0.2s; }
+        .search-result-item:hover { background: #f0f0f0; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; border-radius: 24px; padding: 25px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+        .modal-content h3 { margin-bottom: 20px; }
+        .modal-content input, .modal-content select, .modal-content textarea { margin-bottom: 15px; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .login-box { background: white; border-radius: 30px; padding: 30px; width: 90%; max-width: 380px; text-align: center; }
+        .login-box input { margin: 12px 0; padding: 12px; width: 100%; }
+        .login-box h2 { margin-bottom: 20px; color: #1e4a76; }
+        .remember-me { display: flex; align-items: center; justify-content: flex-start; gap: 10px; margin: 10px 0; }
+        .remember-me input { width: auto; margin: 0; }
+        .user-info { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; }
+        .select-all-row { margin-bottom: 15px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .select-all-row label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .select-all-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .permissions-table th, .permissions-table td { font-size: 12px; padding: 8px 4px; text-align: center; }
+        .permissions-table td:first-child { text-align: right; font-weight: bold; }
+        .perm-checkbox { width: 18px; height: 18px; cursor: pointer; transform: scale(1.2); }
+        
+        /* حاوية الإشعارات الجديدة */
+        .toast-container {
+            position: fixed;
+            top: 120px; /* أسفل التبويبات */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: auto;
+            min-width: 250px;
+            max-width: 400px;
+            direction: rtl;
+            pointer-events: none;
+        }
+        .toast {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 12px;
+            font-size: 14px;
+            animation: slideDownFade 0.3s ease;
+            pointer-events: auto;
+            border-right: 5px solid;
+            position: relative;
+        }
+        .toast-success { border-right-color: #28a745; }
+        .toast-danger { border-right-color: #dc3545; }
+        .toast-warning { border-right-color: #fd7e14; }
+        .toast-info { border-right-color: #17a2b8; }
+        .toast-icon { font-size: 18px; }
+        .toast-message { flex: 1; color: #333; }
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.2s;
+        }
+        .toast-close:hover { color: #333; }
+        
+        @keyframes slideDownFade {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .tabs, .btn, .header-card .btn, .form-grid, .alert, .dept-selector, .filter-bar, .search-container, .no-print, .modal, .user-info, .btn-print, .btn-excel, .btn-danger, .btn-edit, .btn-close, .toast-container, .select-all-row, .filter-bar, .stats-row, .btn-primary { display: none !important; }
+            .card { box-shadow: none; padding: 0; margin: 0; }
+            .tab-content { display: block !important; }
+            .device-card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+            .device-cards-container { padding: 0; }
+        }
+        @media (max-width: 700px) { th, td { font-size: 11px; padding: 5px; } .btn { padding: 4px 10px; font-size: 11px; } }
+    </style>
+</head>
+<body>
+
+<!-- شاشة تسجيل الدخول -->
+<div id="loginOverlay" class="login-overlay">
+    <div class="login-box">
+        <h2>🏥 مستشفيات جامعة المنوفية</h2>
+        <h3>نظام الهندسة الطبية</h3>
+        <input type="text" id="loginUsername" placeholder="اسم المستخدم">
+        <input type="password" id="loginPassword" placeholder="كلمة السر">
+        <div class="remember-me">
+            <input type="checkbox" id="rememberMeCheckbox">
+            <label for="rememberMeCheckbox">تذكرني</label>
+        </div>
+        <button class="btn btn-success" onclick="login()" style="width:100%;">دخول</button>
+        <div id="loginError" style="color:red; margin-top:10px; display:none;">اسم المستخدم أو كلمة السر غير صحيحة</div>
+    </div>
+</div>
+
+<!-- النظام الرئيسي -->
+<div id="mainApp" style="display:none;">
+<div class="container">
+    <div class="card header-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1>🏥 مستشفيات جامعة المنوفية</h1>
+                <h2>الهندسة الطبية</h2>
+                <p style="font-size: 14px; margin-top: 8px;">نظام إدارة الأجهزة والعقود | الأعطال</p>
+            </div>
+            <div class="user-info">
+                <span>👤 <span id="currentUserSpan"></span> (<span id="currentRoleSpan"></span>)</span>
+                <button class="btn btn-danger" onclick="logout()" style="margin-right:10px;">🚪 تسجيل خروج</button>
+            </div>
+        </div>
+        <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn btn-excel" onclick="exportDevicesToExcel()">📎 تصدير الأجهزة إلى Excel</button>
+            <button class="btn btn-excel" onclick="exportAllFaultsToExcel()">📎 تصدير جميع الأعطال إلى Excel</button>
+            <button class="btn btn-danger" onclick="clearAllData()" id="clearAllBtn" style="display:none;">🗑️ مسح الكل</button>
+        </div>
+    </div>
+
+    <div id="contractAlert" class="alert" style="display:none;"></div>
+
+    <div class="tabs" id="tabsContainer">
+        <button class="tab-btn active" onclick="showTab('dashboard')">📊 لوحة التحكم</button>
+        <button class="tab-btn" onclick="showTab('devices')">🩺 الأجهزة والعقود</button>
+        <button class="tab-btn" onclick="showTab('faults')">🔧 الأعطال النشطة</button>
+        <button class="tab-btn" onclick="showTab('closedFaultsTab')">✅ الأعطال المغلقة</button>
+        <button class="tab-btn" onclick="showTab('users')" id="usersTabBtn" style="display:none;">👥 إدارة المستخدمين</button>
+        <button class="tab-btn" onclick="showTab('permissions')" id="permissionsTabBtn" style="display:none;">🔐 صلاحيات متقدمة</button>
+        <button class="tab-btn" onclick="showTab('onlineUsers')" id="onlineUsersTabBtn" style="display:none;">🟢 المتصلون</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="tab-content active">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <h3>📈 إحصائيات سريعة</h3>
+                <button class="btn btn-print" onclick="printDashboard()">🖨️ طباعة</button>
+            </div>
+            <div class="stats-row" id="stats"></div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-warning" onclick="showContractAlertsModal()">🔔 عرض تنبيهات العقود</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- الأجهزة والعقود -->
+    <div id="devices" class="tab-content">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <h3>➕ إضافة جهاز وعقد جديد</h3>
+                <div>
+                    <button class="btn btn-primary" onclick="printSelectedCards()">🃏 طباعة كروت المحددين</button>
+                    <button class="btn btn-print" onclick="printDevices()">🖨️ طباعة الجدول</button>
+                </div>
+            </div>
+            <div class="dept-selector">
+                <label>🏷️ القسم:</label>
+                <select id="deviceDeptSelect">
+                    <option value="">-- اختر قسم أو اكتب قسم جديد --</option>
+                </select>
+                <input type="text" id="newDeptName" placeholder="أو اكتب اسم قسم جديد هنا" style="width:250px;">
+            </div>
+            <div class="form-grid">
+                <input type="text" id="deviceName" placeholder="اسم الجهاز *">
+                <input type="text" id="deviceBrand" placeholder="الماركة">
+                <input type="text" id="deviceModel" placeholder="الموديل">
+                <input type="text" id="deviceSN" placeholder="S/N">
+                <input type="text" id="deviceAgent" placeholder="الوكيل">
+                <input type="text" id="contractType" placeholder="نوع العقد">
+                <input type="date" id="contractStart">
+                <input type="date" id="contractEnd">
+                <input type="text" id="contractStatus" placeholder="حالة العقد">
+                <div><button class="btn btn-success" onclick="addDevice()">➕ إضافة جهاز وعقد</button></div>
+            </div>
+            
+            <div class="dept-selector" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                <label>🗑️ حذف قسم:</label>
+                <select id="deleteDeptSelect">
+                    <option value="">-- اختر قسم للحذف --</option>
+                </select>
+                <button class="btn btn-danger" onclick="deleteDepartment()" id="deleteDeptBtn">🗑️ حذف القسم</button>
+            </div>
+            
+            <div class="filter-bar">
+                <label>🔍 فلتر القسم:</label>
+                <select id="deviceFilterSelect" onchange="renderDevices()"></select>
+                <div class="search-container" style="flex:1;">
+                    <input type="text" id="deviceSearchInput" placeholder="🔍 بحث في الأجهزة..." onkeyup="searchDevicesTable()" autocomplete="off">
+                </div>
+            </div>
+            
+            <div class="select-all-row">
+                <label>
+                    <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"> 
+                    <strong>تحديد الكل</strong>
+                </label>
+                <button class="btn btn-primary" onclick="printSelectedCards()">🃏 طباعة الكروت المحددة (<span id="selectedCount">0</span>)</button>
+                <button class="btn btn-secondary" onclick="clearSelection()">مسح التحديد</button>
+            </div>
+            
+            <h3>📋 قائمة الأجهزة والعقود</h3>
+            <div class="table-wrapper"><table id="devicesTable"><thead>
+                <th style="width:40px;"><input type="checkbox" id="headerSelectAll" onchange="toggleSelectAllFromHeader()"></th>
+                <th>القسم</th><th>اسم الجهاز</th><th>الماركة</th><th>الموديل</th><th>S/N</th><th>الوكيل</th>
+                <th>نوع العقد</th><th>بداية العقد</th><th>نهاية العقد</th><th>حالة العقد</th><th>تنبيه</th><th class="no-print-column">الإجراءات</th>
+            </thead><tbody></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- الأعطال النشطة -->
+    <div id="faults" class="tab-content">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <h3>⚠️ تسجيل عطل جديد</h3>
+                <button class="btn btn-print" onclick="printActiveFaults()">🖨️ طباعة</button>
+            </div>
+            <div class="form-grid">
+                <div class="search-container">
+                    <input type="text" id="searchDeviceInput" placeholder="🔍 بحث عن جهاز..." onkeyup="searchDevicesForFault()" autocomplete="off">
+                    <div id="searchResults" class="search-results" style="display: none;"></div>
+                </div>
+                <select id="faultDeptSelect">
+                    <option value="">-- اختر القسم --</option>
+                </select>
+                <input type="text" id="faultBrand" placeholder="الماركة">
+                <input type="text" id="faultModel" placeholder="الموديل">
+                <input type="text" id="faultSN" placeholder="S/N">
+                <textarea id="faultDesc" placeholder="وصف العطل *"></textarea>
+                <input type="date" id="faultDate">
+                <textarea id="faultActions" placeholder="الإجراءات المتخذة"></textarea>
+                <!-- حقل الفني المسند: نص حر + datalist -->
+                <input type="text" id="faultAssignedTech" list="techList" placeholder="👨‍🔧 الفني المسند إليه (اكتب أو اختر)" autocomplete="off">
+                <datalist id="techList"></datalist>
+                <div><button class="btn btn-success" onclick="addFault()">➕ تسجيل العطل</button></div>
+            </div>
+            
+            <div class="filter-bar">
+                <label>🔍 فلتر القسم:</label>
+                <select id="faultFilterSelect" onchange="renderFaults()"></select>
+                <div class="search-container" style="flex:1;">
+                    <input type="text" id="faultTableSearchInput" placeholder="🔍 بحث في الأعطال..." onkeyup="searchFaultsTable()" autocomplete="off">
+                </div>
+            </div>
+            
+            <h3>⚙️ الأعطال النشطة</h3>
+            <div class="table-wrapper"><table id="faultsTable"><thead>
+                <th>القسم</th><th>الجهاز</th><th>الماركة</th><th>الموديل</th><th>S/N</th><th>وصف العطل</th><th>الفني المسند</th><th>تاريخ العطل</th><th>الإجراءات</th><th class="no-print-column"></th>
+            </thead><tbody></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- الأعطال المغلقة -->
+    <div id="closedFaultsTab" class="tab-content">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <h3>✅ الأعطال المغلقة</h3>
+                <button class="btn btn-print" onclick="printClosedFaults()">🖨️ طباعة</button>
+            </div>
+            
+            <div class="filter-bar">
+                <label>🔍 فلتر القسم:</label>
+                <select id="closedFaultFilterSelect" onchange="renderClosedFaults()"></select>
+                <div class="search-container" style="flex:1;">
+                    <input type="text" id="closedFaultSearchInput" placeholder="🔍 بحث في الأعطال المغلقة..." onkeyup="searchClosedFaultsTable()" autocomplete="off">
+                </div>
+            </div>
+            
+            <div class="table-wrapper"><table id="closedFaultsTable"><thead>
+                <th>القسم</th><th>الجهاز</th><th>الماركة</th><th>الموديل</th><th>S/N</th><th>وصف العطل</th><th>الفني المسند</th><th>الفني المنفذ</th><th>تاريخ العطل</th><th>تاريخ الإغلاق</th><th class="no-print-column">الإجراءات</th>
+            </thead><tbody></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- إدارة المستخدمين -->
+    <div id="users" class="tab-content">
+        <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
                 <h3>👥 إدارة المستخدمين</h3>
             </div>
